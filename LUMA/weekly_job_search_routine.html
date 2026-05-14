@@ -1,0 +1,287 @@
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+.wrap { padding: 1.5rem 0; }
+.day-nav { display: flex; gap: 6px; margin-bottom: 1.5rem; flex-wrap: wrap; }
+.day-btn { padding: 6px 14px; font-size: 13px; font-weight: 500; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); background: transparent; color: var(--color-text-secondary); cursor: pointer; }
+.day-btn.active { background: var(--color-background-secondary); color: var(--color-text-primary); border-color: var(--color-border-primary); }
+.day-panel { display: none; }
+.day-panel.active { display: block; }
+.day-meta { display: flex; align-items: baseline; gap: 12px; margin-bottom: 1.25rem; }
+.day-title { font-size: 18px; font-weight: 500; color: var(--color-text-primary); }
+.day-duration { font-size: 13px; color: var(--color-text-tertiary); }
+.day-badge { font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 500; }
+.badge-std { background: #E1F5EE; color: #085041; }
+.badge-light { background: #FAEEDA; color: #633806; }
+.badge-off { background: #F1EFE8; color: #444441; }
+
+.timeline { position: relative; padding-left: 28px; }
+.timeline::before { content: ''; position: absolute; left: 7px; top: 8px; bottom: 8px; width: 1px; background: var(--color-border-tertiary); }
+
+.step { position: relative; margin-bottom: 1.25rem; }
+.step:last-child { margin-bottom: 0; }
+.step-dot { position: absolute; left: -24px; top: 4px; width: 15px; height: 15px; border-radius: 50%; border: 0.5px solid var(--color-border-secondary); background: var(--color-background-primary); display: flex; align-items: center; justify-content: center; }
+.step-dot i { font-size: 8px; }
+.dot-purple { border-color: #AFA9EC; background: #EEEDFE; color: #534AB7; }
+.dot-teal { border-color: #5DCAA5; background: #E1F5EE; color: #0F6E56; }
+.dot-amber { border-color: #EF9F27; background: #FAEEDA; color: #854F0B; }
+.dot-coral { border-color: #F0997B; background: #FAECE7; color: #993C1D; }
+.dot-gray { border-color: #B4B2A9; background: #F1EFE8; color: #444441; }
+.dot-blue { border-color: #85B7EB; background: #E6F1FB; color: #185FA5; }
+.dot-red { border-color: #F09595; background: #FCEBEB; color: #A32D2D; }
+
+.step-time { font-size: 11px; color: var(--color-text-tertiary); margin-bottom: 3px; font-weight: 500; letter-spacing: 0.04em; }
+.step-name { font-size: 14px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 4px; }
+.step-desc { font-size: 13px; color: var(--color-text-secondary); line-height: 1.55; }
+.step-tag { display: inline-block; font-size: 11px; padding: 2px 7px; border-radius: 20px; margin-left: 6px; vertical-align: middle; }
+.tag-high { background: #EAF3DE; color: #27500A; }
+.tag-med { background: #FAEEDA; color: #633806; }
+.tag-unique { background: #EEEDFE; color: #3C3489; }
+
+.divider { border: none; border-top: 0.5px solid var(--color-border-tertiary); margin: 1.25rem 0; }
+</style>
+
+<div class="wrap">
+<h2 class="sr-only">Weekly job search routine by day</h2>
+
+<div class="day-nav">
+  <button class="day-btn active" onclick="show('mon')">Monday</button>
+  <button class="day-btn" onclick="show('tue')">Tuesday</button>
+  <button class="day-btn" onclick="show('wed')">Wednesday</button>
+  <button class="day-btn" onclick="show('thu')">Thursday</button>
+  <button class="day-btn" onclick="show('fri')">Friday</button>
+  <button class="day-btn" onclick="show('wknd')">Sat – Sun</button>
+</div>
+
+<div id="mon" class="day-panel active">
+  <div class="day-meta">
+    <span class="day-title">Monday</span>
+    <span class="day-duration">~2.5 hrs total</span>
+    <span class="day-badge badge-unique">Reset + launch day</span>
+  </div>
+  <div class="timeline">
+    <div class="step">
+      <div class="step-dot dot-purple"><i class="ti ti-layout-list" aria-hidden="true"></i></div>
+      <div class="step-time">8:00 am — 20 min</div>
+      <div class="step-name">Reset your tracker <span class="step-tag tag-unique">Monday only</span></div>
+      <div class="step-desc">Open your job search spreadsheet. Clear "pending" statuses from last week. Mark anything that got no response in 7+ days as closed. You're starting a clean week.</div>
+    </div>
+    <div class="step">
+      <div class="step-dot dot-purple"><i class="ti ti-search" aria-hidden="true"></i></div>
+      <div class="step-time">8:20 am — 20 min</div>
+      <div class="step-name">Source and save roles for the week <span class="step-tag tag-unique">Monday only</span></div>
+      <div class="step-desc">Check Ashby, LinkedIn saved searches, and your 7 target company career pages. Save 10–15 roles to your tracker. You are not applying yet — you are building this week's pipeline.</div>
+    </div>
+    <div class="step">
+      <div class="step-dot dot-teal"><i class="ti ti-send" aria-hidden="true"></i></div>
+      <div class="step-time">8:40 am — 25 min</div>
+      <div class="step-name">LinkedIn outreach batch <span class="step-tag tag-high">high ROI</span></div>
+      <div class="step-desc">Send 3–5 personalized DMs to current SDRs or AEs at target companies. One sentence on why you're reaching out, one genuine question. No referral ask yet — build rapport first.</div>
+    </div>
+    <div class="step">
+      <div class="step-dot dot-blue"><i class="ti ti-file-text" aria-hidden="true"></i></div>
+      <div class="step-time">9:05 am — 75 min</div>
+      <div class="step-name">Apply — 3 to 5 roles <span class="step-tag tag-high">high ROI</span></div>
+      <div class="step-desc">Pull from your tracker (roles you saved today or last Friday). Customize your cover letter for each — should take ~10 min per application using your template. Never send a generic copy-paste.</div>
+    </div>
+    <div class="step">
+      <div class="step-dot dot-amber"><i class="ti ti-message-circle" aria-hidden="true"></i></div>
+      <div class="step-time">Afternoon — 10 min</div>
+      <div class="step-name">Respond to any replies <span class="step-tag tag-high">high ROI</span></div>
+      <div class="step-desc">Reply to any DMs or emails same day. Speed signals exactly what SDR managers are hiring for. Never let a reply sit 24+ hours.</div>
+    </div>
+    <div class="step">
+      <div class="step-dot dot-gray"><i class="ti ti-chart-bar" aria-hidden="true"></i></div>
+      <div class="step-time">Afternoon — 5 min</div>
+      <div class="step-name">Log activity in tracker</div>
+      <div class="step-desc">Log all applications sent and DMs sent today. Totals only — keep it fast.</div>
+    </div>
+  </div>
+</div>
+
+<div id="tue" class="day-panel">
+  <div class="day-meta">
+    <span class="day-title">Tuesday</span>
+    <span class="day-duration">~2 hrs total</span>
+    <span class="day-badge badge-std">Core cadence</span>
+  </div>
+  <div class="timeline">
+    <div class="step">
+      <div class="step-dot dot-teal"><i class="ti ti-send" aria-hidden="true"></i></div>
+      <div class="step-time">8:00 am — 25 min</div>
+      <div class="step-name">LinkedIn outreach batch <span class="step-tag tag-high">high ROI</span></div>
+      <div class="step-desc">Send 3–5 new personalized DMs to SDRs or AEs at target companies. Don't repeat Monday's targets — move to new people at the same or different companies.</div>
+    </div>
+    <div class="step">
+      <div class="step-dot dot-blue"><i class="ti ti-file-text" aria-hidden="true"></i></div>
+      <div class="step-time">8:25 am — 75 min</div>
+      <div class="step-name">Apply — 3 to 5 roles <span class="step-tag tag-high">high ROI</span></div>
+      <div class="step-desc">Pull from your tracker. Customize cover letter per application. Tuesday applications get among the fastest recruiter response rates of the week — use this day well.</div>
+    </div>
+    <div class="step">
+      <div class="step-dot dot-amber"><i class="ti ti-refresh" aria-hidden="true"></i></div>
+      <div class="step-time">9:40 am — 10 min</div>
+      <div class="step-name">Follow-up check <span class="step-tag tag-med">medium ROI</span></div>
+      <div class="step-desc">Review DMs sent last Tuesday (7 days ago). Anyone who didn't reply gets one polite follow-up — then they're closed. One follow-up max per person, ever.</div>
+    </div>
+    <div class="step">
+      <div class="step-dot dot-amber"><i class="ti ti-message-circle" aria-hidden="true"></i></div>
+      <div class="step-time">Afternoon — 10 min</div>
+      <div class="step-name">Respond to any replies <span class="step-tag tag-high">high ROI</span></div>
+      <div class="step-desc">Check DMs and email. Respond same day to anything that came in.</div>
+    </div>
+    <div class="step">
+      <div class="step-dot dot-gray"><i class="ti ti-chart-bar" aria-hidden="true"></i></div>
+      <div class="step-time">Afternoon — 5 min</div>
+      <div class="step-name">Log activity in tracker</div>
+      <div class="step-desc">Update applications sent, DMs sent, and any replies received.</div>
+    </div>
+  </div>
+</div>
+
+<div id="wed" class="day-panel">
+  <div class="day-meta">
+    <span class="day-title">Wednesday</span>
+    <span class="day-duration">~2 hrs total</span>
+    <span class="day-badge badge-std">Core cadence</span>
+  </div>
+  <div class="timeline">
+    <div class="step">
+      <div class="step-dot dot-teal"><i class="ti ti-send" aria-hidden="true"></i></div>
+      <div class="step-time">8:00 am — 25 min</div>
+      <div class="step-name">LinkedIn outreach batch <span class="step-tag tag-high">high ROI</span></div>
+      <div class="step-desc">Send 3–5 new DMs. By Wednesday you should have momentum — if anyone replied Mon or Tue, think about who else at that company is worth reaching out to.</div>
+    </div>
+    <div class="step">
+      <div class="step-dot dot-blue"><i class="ti ti-file-text" aria-hidden="true"></i></div>
+      <div class="step-time">8:25 am — 75 min</div>
+      <div class="step-name">Apply — 3 to 5 roles <span class="step-tag tag-high">high ROI</span></div>
+      <div class="step-desc">Pull from your tracker. Wednesday is your last high-value application day — Thurs/Fri submissions get reviewed later. Prioritize your strongest applications today.</div>
+    </div>
+    <div class="step">
+      <div class="step-dot dot-amber"><i class="ti ti-refresh" aria-hidden="true"></i></div>
+      <div class="step-time">9:40 am — 10 min</div>
+      <div class="step-name">Follow-up check <span class="step-tag tag-med">medium ROI</span></div>
+      <div class="step-desc">Review DMs sent last Wednesday (7 days ago). Send one follow-up to anyone who hasn't replied. Move on after that.</div>
+    </div>
+    <div class="step">
+      <div class="step-dot dot-amber"><i class="ti ti-message-circle" aria-hidden="true"></i></div>
+      <div class="step-time">Afternoon — 10 min</div>
+      <div class="step-name">Respond to any replies <span class="step-tag tag-high">high ROI</span></div>
+      <div class="step-desc">Same-day response to anything in DMs or email.</div>
+    </div>
+    <div class="step">
+      <div class="step-dot dot-gray"><i class="ti ti-chart-bar" aria-hidden="true"></i></div>
+      <div class="step-time">Afternoon — 5 min</div>
+      <div class="step-name">Log activity in tracker</div>
+      <div class="step-desc">Update your tracker with today's applications and outreach.</div>
+    </div>
+  </div>
+</div>
+
+<div id="thu" class="day-panel">
+  <div class="day-meta">
+    <span class="day-title">Thursday</span>
+    <span class="day-duration">~1.5 hrs total</span>
+    <span class="day-badge badge-std">Core cadence</span>
+  </div>
+  <div class="timeline">
+    <div class="step">
+      <div class="step-dot dot-teal"><i class="ti ti-send" aria-hidden="true"></i></div>
+      <div class="step-time">8:00 am — 25 min</div>
+      <div class="step-name">LinkedIn outreach batch <span class="step-tag tag-high">high ROI</span></div>
+      <div class="step-desc">Send 3–5 new DMs. Keep the cadence even if energy dips mid-week — outreach sent Thursday gets responses Monday morning, keeping next week's pipeline warm.</div>
+    </div>
+    <div class="step">
+      <div class="step-dot dot-blue"><i class="ti ti-file-text" aria-hidden="true"></i></div>
+      <div class="step-time">8:25 am — 60 min</div>
+      <div class="step-name">Apply — 3 to 5 roles <span class="step-tag tag-high">high ROI</span></div>
+      <div class="step-desc">Fewer applications today is fine — 3 quality applications beats 5 rushed ones. Pull from whatever remains in your tracker from Monday's sourcing session.</div>
+    </div>
+    <div class="step">
+      <div class="step-dot dot-amber"><i class="ti ti-refresh" aria-hidden="true"></i></div>
+      <div class="step-time">9:25 am — 10 min</div>
+      <div class="step-name">Follow-up check <span class="step-tag tag-med">medium ROI</span></div>
+      <div class="step-desc">Review DMs sent last Thursday. One follow-up to non-responders, then close them out.</div>
+    </div>
+    <div class="step">
+      <div class="step-dot dot-amber"><i class="ti ti-message-circle" aria-hidden="true"></i></div>
+      <div class="step-time">Afternoon — 10 min</div>
+      <div class="step-name">Respond to any replies <span class="step-tag tag-high">high ROI</span></div>
+      <div class="step-desc">Same-day responses to all DMs and emails.</div>
+    </div>
+    <div class="step">
+      <div class="step-dot dot-gray"><i class="ti ti-chart-bar" aria-hidden="true"></i></div>
+      <div class="step-time">Afternoon — 5 min</div>
+      <div class="step-name">Log activity in tracker</div>
+      <div class="step-desc">Keep your tracker current.</div>
+    </div>
+  </div>
+</div>
+
+<div id="fri" class="day-panel">
+  <div class="day-meta">
+    <span class="day-title">Friday</span>
+    <span class="day-duration">~1.5 hrs total</span>
+    <span class="day-badge badge-light">Review + close day</span>
+  </div>
+  <div class="timeline">
+    <div class="step">
+      <div class="step-dot dot-amber"><i class="ti ti-message-circle" aria-hidden="true"></i></div>
+      <div class="step-time">8:00 am — 10 min</div>
+      <div class="step-name">Respond to any replies <span class="step-tag tag-high">high ROI</span></div>
+      <div class="step-desc">Clear your inbox first. Any reply left over the weekend loses momentum. Respond before anything else.</div>
+    </div>
+    <div class="step">
+      <div class="step-dot dot-amber"><i class="ti ti-refresh" aria-hidden="true"></i></div>
+      <div class="step-time">8:10 am — 10 min</div>
+      <div class="step-name">Follow-up check <span class="step-tag tag-med">medium ROI</span></div>
+      <div class="step-desc">Review DMs sent last Friday. Send one follow-up to non-responders. This is your last outreach of the week — keep it warm but not needy.</div>
+    </div>
+    <div class="step">
+      <div class="step-dot dot-gray"><i class="ti ti-chart-bar" aria-hidden="true"></i></div>
+      <div class="step-time">8:20 am — 30 min</div>
+      <div class="step-name">Weekly review <span class="step-tag tag-unique">Friday only</span></div>
+      <div class="step-desc">Count totals: applications sent, DMs sent, replies received, conversations active. Ask yourself: what got a response this week and why? What got zero traction? Adjust one thing for next week — not everything.</div>
+    </div>
+    <div class="step">
+      <div class="step-dot dot-purple"><i class="ti ti-search" aria-hidden="true"></i></div>
+      <div class="step-time">8:50 am — 30 min</div>
+      <div class="step-name">Source roles for next week <span class="step-tag tag-unique">Friday only</span></div>
+      <div class="step-desc">Check Ashby, LinkedIn saved searches, and your 7 target company career pages. Save 10–15 roles to your tracker. You will not apply today — this is next Monday's pipeline. Do not apply to roles on Fridays.</div>
+    </div>
+    <div class="step">
+      <div class="step-dot dot-red"><i class="ti ti-ban" aria-hidden="true"></i></div>
+      <div class="step-time">Rest of day</div>
+      <div class="step-name">No applications today <span class="step-tag" style="background:#FCEBEB;color:#A32D2D;">Friday rule</span></div>
+      <div class="step-desc">Applications submitted Friday sit at the bottom of a pile that fills up by Tuesday morning. Save your energy. You've done the work — let the week close.</div>
+    </div>
+  </div>
+</div>
+
+<div id="wknd" class="day-panel">
+  <div class="day-meta">
+    <span class="day-title">Saturday – Sunday</span>
+    <span class="day-duration">0 hrs</span>
+    <span class="day-badge badge-off">Full off</span>
+  </div>
+  <div class="timeline">
+    <div class="step">
+      <div class="step-dot dot-gray"><i class="ti ti-moon" aria-hidden="true"></i></div>
+      <div class="step-time">All day</div>
+      <div class="step-name">No applications, no DMs, no sourcing</div>
+      <div class="step-desc">Weekends are off. Companies do not review applications on weekends. Recruiters are not active. Your rest directly protects the quality of your Monday through Wednesday — the days that actually matter. Burnout is the #1 job search killer. The searches that fail are the ones that spike and crash, not the ones that go slow and steady.</div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+function show(day) {
+  document.querySelectorAll('.day-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(day).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>

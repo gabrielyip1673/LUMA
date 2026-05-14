@@ -1,0 +1,9 @@
+{
+  "name": "luma",
+  "description": "Upload and manage tasks in LUMA, Gabriel's local task manager. Provides a skill to parse natural-language task descriptions and push them to the running LUMA app.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Gabriel Yip"
+  },
+  "skills": "./skills/"
+}

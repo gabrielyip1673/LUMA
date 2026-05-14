@@ -1,0 +1,24 @@
+# Secrets
+.luma_token
+
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+
+# Logs
+server.log
+
+# IDE / editor
+.vscode/
+.idea/
+
+# Claude Code local settings
+.claude/settings.local.json
+
+# Personal files not part of the app
+*.xlsx
+*.pages
+*.webp
