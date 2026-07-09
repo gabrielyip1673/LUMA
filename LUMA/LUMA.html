@@ -324,8 +324,8 @@
   .kanban-col .task-card:active { cursor: grabbing; }
 
   /* Calendar view */
-  .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-  .calendar-header h2 { font-size: 18px; font-weight: 600; }
+  .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; background: rgba(250, 250, 247, 0.95); padding: 8px 16px; border-radius: 8px; backdrop-filter: blur(8px); }
+  .calendar-header h2 { font-size: 18px; font-weight: 600; color: var(--text); }
   .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: var(--border); padding: 1px; border-radius: 8px; }
   .cal-day-header { background: rgba(250, 250, 247, 0.95); padding: 8px 4px; text-align: center; font-size: 11px; text-transform: uppercase; color: var(--text-dim); font-weight: 600; }
   .cal-day { background: rgba(250, 250, 247, 0.95); min-height: 80px; padding: 6px; cursor: pointer; overflow: hidden; backdrop-filter: blur(8px); }
@@ -961,8 +961,8 @@ function getFiltered() {
       }
     }
 
-    // 7-day window filter (unless "all tasks" is selected)
-    if (!showAllTasks && t.status !== 'Done') {
+    // 7-day window filter (unless "all tasks" is selected or in calendar view)
+    if (!showAllTasks && currentView !== 'calendar' && t.status !== 'Done') {
       if (t.due) {
         const [year, month, day] = t.due.split('-').map(Number);
         const dueDate = new Date(year, month - 1, day);
@@ -1144,7 +1144,11 @@ function renderThread(filtered) {
     html += `<div class="thread-cat-row" draggable="true" data-thread-row="${esc(cat)}">`;
     html += `<div class="thread-cat-cell" data-thread-cat="${esc(cat)}" style="--cat-color:${color}"><div class="thread-cat-cell-inner"><span class="drag-handle">&#9776;</span><span class="thread-cat-dot"></span>${esc(cat)}</div></div>`;
     days.forEach(day => {
-      const cards = byCat[cat][day.iso].map(t => taskCardHTML(t, true)).join('');
+      const sorted = byCat[cat][day.iso].slice().sort((a, b) => {
+        const sc = t => (parseInt(t.impact)||3)*2 + (parseInt(t.urgency)||3)*3 + (6-(parseInt(t.effort)||3));
+        return sc(b) - sc(a);
+      });
+      const cards = sorted.map(t => taskCardHTML(t, true)).join('');
       html += `<div class="thread-cell" data-thread-date="${day.iso}" data-thread-cat="${esc(cat)}" style="--cat-color:${color}"><div class="thread-cell-inner">${cards}</div></div>`;
     });
     html += `</div>`;
@@ -1469,6 +1473,10 @@ function attachDragDrop() {
     });
   });
   document.querySelectorAll('.kanban-col').forEach(col => {
+    col.addEventListener('click', (e) => {
+      if (e.target.closest('.task-card')) return;
+      openModalWithStatus(col.dataset.kanbanStatus);
+    });
     col.addEventListener('dragover', (e) => { e.preventDefault(); col.classList.add('drag-over'); });
     col.addEventListener('dragleave', () => col.classList.remove('drag-over'));
     col.addEventListener('drop', (e) => {
@@ -1541,6 +1549,11 @@ function openModalWithDate(dateStr, category) {
   if (category) document.getElementById('f_category').value = category;
 }
 
+function openModalWithStatus(status) {
+  openModal(null);
+  document.getElementById('f_status').value = status;
+}
+
 function openModal(id) {
   editingId = id || null;
   document.getElementById('modalTitle').textContent = id ? 'Edit Task' : 'New Task';
@@ -1551,9 +1564,9 @@ function openModal(id) {
   document.getElementById('f_category').value = t.category || '';
   document.getElementById('f_status').value = t.status || 'Not Started';
   dpSelectDate(t.due ? t.due.slice(0,10) : '');
-  document.getElementById('f_impact').value = t.impact || 3;
-  document.getElementById('f_urgency').value = t.urgency || 3;
-  document.getElementById('f_effort').value = t.effort || 3;
+  document.getElementById('f_impact').value = t.impact || 2;
+  document.getElementById('f_urgency').value = t.urgency || 2;
+  document.getElementById('f_effort').value = t.effort || 2;
   document.getElementById('f_link').value = t.link || '';
   document.getElementById('f_recurring').value = t.recurring || '';
   selectedSpawnDay = t.recurSpawnDay || (t.recurDays && t.recurDays[0]) || '';
@@ -2051,57 +2064,40 @@ async function pollInbox() {
 
 // === Job Routine ===
 const JR_DAYS = [
-  { id:'mon', label:'Monday', duration:'8:00–5:00', badge:'Reset + source day', badgeClass:'jr-badge-unique', subtitle:'AM — planning & sourcing | PM — applications & resume', steps:[
-    {time:'8:00–8:20', name:'Reset tracker', tag:'Monday only', tagClass:'jr-tag-unique', desc:'Clear last week\'s pending statuses. Mark no-response items closed. Start with a clean pipeline.'},
-    {time:'8:20–9:15', name:'Source and save roles', tag:'high ROI', tagClass:'jr-tag-high', desc:'Check Ashby, LinkedIn alerts, and your 7 target company career pages. Save 10–15 SDR/BDR/CS roles to tracker. Build the week\'s pipeline — do not apply yet.'},
-    {time:'9:15–10:15', name:'Tailor resume to 2 saved roles', tag:'high ROI', tagClass:'jr-tag-high', desc:'Pull 2 roles from tracker. Mirror each job description\'s language — keywords, responsibilities, outcomes. Save as separate files. One tailored resume per role.'},
-    {time:'10:15–11:00', name:'Write this week\'s LinkedIn post', tag:'Monday only', tagClass:'jr-tag-unique', desc:'Draft one post. Topics that perform: what you\'re learning about sales, a reflection on the job search, a question for your network, or a story from your barista/Stanford days reframed professionally. Authentic beats polished.'},
-    {time:'11:00–11:30', name:'Respond to replies + LinkedIn engagement', tag:'', tagClass:'', desc:'Reply to any DMs or emails. Spend 10 min commenting on posts from SDRs, AEs, and hiring managers at target companies — builds visibility before you DM them.'},
-    {time:'1:00–3:00', name:'Apply to 3–4 roles', tag:'high ROI', tagClass:'jr-tag-high', desc:'Use today\'s tailored resumes. Customize cover letter for each (~15 min each). Never send a generic copy-paste. Log each in tracker immediately after submitting.'},
-    {time:'3:00–4:00', name:'LinkedIn outreach — 3–5 DMs', tag:'high ROI', tagClass:'jr-tag-high', desc:'Personalized DMs to current SDRs or AEs at target companies. One sentence why you\'re reaching out, one genuine question. No referral ask yet — build rapport first.'},
-    {time:'4:00–4:30', name:'Research networking events for the week', tag:'Monday only', tagClass:'jr-tag-unique', desc:'Search Eventbrite, Luma, SDR Nation, Bravado for Bay Area sales events this week. Identify 1 to attend. Add to calendar. Look up attendees if RSVP list is public.'},
-    {time:'4:30–5:00', name:'Log activity + plan Tuesday', tag:'', tagClass:'', desc:'Update tracker. Note anything incomplete to carry forward. Write 2–3 bullet intentions for tomorrow\'s session.'}
+  { id:'mon', label:'Monday', duration:'Daily tasks + Mon extras', badge:'Full day', badgeClass:'jr-badge-unique', subtitle:'Daily execution + weekly kickoff tasks', steps:[
+    {time:'Daily', name:'Apply to 10 targeted listings', tag:'high ROI', tagClass:'jr-tag-high', desc:'Apply to 10 well-fit roles (founding GTM / BizOps / Founders Associate at sub-50-person companies). Quality of targeting over raw count.'},
+    {time:'Daily', name:'Update networking conversations in APHRA', tag:'high ROI', tagClass:'jr-tag-high', desc:'Log latest touches and trigger timely follow-ups so warm threads don\'t go cold.'},
+    {time:'Daily', name:'Update rejections and interview progress in APHRA', tag:'', tagClass:'', desc:'Keep the tracker current. Logged interviews surface what needs prep.'},
+    {time:'Mon/Wed/Fri', name:'Send 2 cold DMs', tag:'high ROI', tagClass:'jr-tag-high', desc:'Highest-leverage activity: builds warm intros and practices the exact GTM/BizOps skill being hired for.'},
+    {time:'Mon/Wed/Fri', name:'Update Joseph on progress', tag:'', tagClass:'', desc:'Accountability check-in. Keeps the search consistent across cycles.'},
+    {time:'Monday only', name:'Search for a networking event', tag:'medium ROI', tagClass:'jr-tag-med', desc:'Find one event worth attending this week. One in-person conversation beats a week of cold applications.'}
   ]},
-  { id:'tue', label:'Tuesday', duration:'8:00–5:00', badge:'Core execution day', badgeClass:'jr-badge-std', subtitle:'AM — resume tailoring & outreach | PM — applications & LinkedIn', steps:[
-    {time:'8:00–8:20', name:'Respond to replies + engage on LinkedIn', tag:'', tagClass:'', desc:'Clear inbox. Reply to DMs and emails from yesterday. Comment on 3–5 posts from people at target companies.'},
-    {time:'8:20–9:30', name:'Tailor resume to 2 more roles', tag:'high ROI', tagClass:'jr-tag-high', desc:'Pull 2 more from tracker. Mirror job description language. Tuesday applications get the fastest recruiter response rates of the week — make them count.'},
-    {time:'9:30–10:30', name:'LinkedIn outreach — 3–5 DMs', tag:'high ROI', tagClass:'jr-tag-high', desc:'New batch. Don\'t repeat Monday\'s targets — move to new people at the same or different companies.'},
-    {time:'10:30–11:00', name:'Follow-up on week-old DMs', tag:'medium ROI', tagClass:'jr-tag-med', desc:'Review DMs sent last Tuesday (7 days ago). One polite follow-up to non-responders. One follow-up max — then close them.'},
-    {time:'11:00–11:30', name:'Publish this week\'s LinkedIn post', tag:'Tuesday only', tagClass:'jr-tag-unique', desc:'Post the draft you wrote Monday. Best window is Tue–Thu 9–11am. Engage with comments within the first hour — early engagement boosts reach.'},
-    {time:'1:00–3:30', name:'Apply to 3–4 roles', tag:'high ROI', tagClass:'jr-tag-high', desc:'Use today\'s tailored resumes. Cover letter customized per application. Log each in tracker.'},
-    {time:'3:30–4:30', name:'Networking event prep (if attending this week)', tag:'', tagClass:'', desc:'Look up attendee list if available. Identify 3–5 people to talk to and note one thing about each. Prepare your intro: who you are, what you\'re looking for, what you bring. Short, direct, confident.'},
-    {time:'4:30–5:00', name:'Log activity + plan Wednesday', tag:'', tagClass:'', desc:'Update tracker. Note anything to carry forward tomorrow.'}
+  { id:'tue', label:'Tuesday', duration:'Daily tasks', badge:'Core day', badgeClass:'jr-badge-std', subtitle:'Daily execution', steps:[
+    {time:'Daily', name:'Apply to 10 targeted listings', tag:'high ROI', tagClass:'jr-tag-high', desc:'Apply to 10 well-fit roles (founding GTM / BizOps / Founders Associate at sub-50-person companies). Quality of targeting over raw count.'},
+    {time:'Daily', name:'Update networking conversations in APHRA', tag:'high ROI', tagClass:'jr-tag-high', desc:'Log latest touches and trigger timely follow-ups so warm threads don\'t go cold.'},
+    {time:'Daily', name:'Update rejections and interview progress in APHRA', tag:'', tagClass:'', desc:'Keep the tracker current. Logged interviews surface what needs prep.'}
   ]},
-  { id:'wed', label:'Wednesday', duration:'8:00–5:00', badge:'Core execution day', badgeClass:'jr-badge-std', subtitle:'AM — resume tailoring & outreach | PM — applications & event follow-up', steps:[
-    {time:'8:00–8:20', name:'Respond to replies + engage on LinkedIn', tag:'', tagClass:'', desc:'Clear inbox. Check comments on Tuesday\'s post and respond — the algorithm rewards this in the first 24 hours.'},
-    {time:'8:20–9:30', name:'Tailor resume to 2 more roles', tag:'high ROI', tagClass:'jr-tag-high', desc:'Wednesday is your last high-value application window of the week. Prioritize your strongest-fit roles today.'},
-    {time:'9:30–10:30', name:'LinkedIn outreach — 3–5 DMs', tag:'high ROI', tagClass:'jr-tag-high', desc:'New batch. If anyone replied Mon or Tue, think about who else at that company is worth reaching out to.'},
-    {time:'10:30–11:00', name:'Follow-up on week-old DMs', tag:'medium ROI', tagClass:'jr-tag-med', desc:'Review DMs sent last Wednesday. One follow-up to non-responders. Close out after that.'},
-    {time:'11:00–11:30', name:'Follow up with event contacts', tag:'if attended event', tagClass:'jr-tag-unique', desc:'Send LinkedIn connection requests or short follow-up notes to anyone you met at a networking event. Reference something specific from your conversation. Do this within 48 hours.'},
-    {time:'1:00–3:30', name:'Apply to 3–4 roles', tag:'high ROI', tagClass:'jr-tag-high', desc:'Use today\'s tailored resumes. Customize cover letter per application. Log each in tracker immediately.'},
-    {time:'3:30–4:30', name:'LinkedIn content engagement block', tag:'', tagClass:'', desc:'Spend 30 min commenting meaningfully on posts from SDRs, sales leaders, and hiring managers — not "great post," but real thoughts. Spend 30 min brainstorming next week\'s post idea.'},
-    {time:'4:30–5:00', name:'Log activity + plan Thursday', tag:'', tagClass:'', desc:'Update tracker. Flag anything incomplete.'}
+  { id:'wed', label:'Wednesday', duration:'Daily tasks + Wed extras', badge:'Core day', badgeClass:'jr-badge-std', subtitle:'Daily execution + outreach', steps:[
+    {time:'Daily', name:'Apply to 10 targeted listings', tag:'high ROI', tagClass:'jr-tag-high', desc:'Apply to 10 well-fit roles (founding GTM / BizOps / Founders Associate at sub-50-person companies). Quality of targeting over raw count.'},
+    {time:'Daily', name:'Update networking conversations in APHRA', tag:'high ROI', tagClass:'jr-tag-high', desc:'Log latest touches and trigger timely follow-ups so warm threads don\'t go cold.'},
+    {time:'Daily', name:'Update rejections and interview progress in APHRA', tag:'', tagClass:'', desc:'Keep the tracker current. Logged interviews surface what needs prep.'},
+    {time:'Mon/Wed/Fri', name:'Send 2 cold DMs', tag:'high ROI', tagClass:'jr-tag-high', desc:'Highest-leverage activity: builds warm intros and practices the exact GTM/BizOps skill being hired for.'},
+    {time:'Mon/Wed/Fri', name:'Update Joseph on progress', tag:'', tagClass:'', desc:'Accountability check-in. Keeps the search consistent across cycles.'}
   ]},
-  { id:'thu', label:'Thursday', duration:'8:00–5:00', badge:'Networking + content day', badgeClass:'jr-badge-light', subtitle:'AM — outreach & applications | PM — networking event or prep', steps:[
-    {time:'8:00–8:20', name:'Respond to replies + engage on LinkedIn', tag:'', tagClass:'', desc:'Clear inbox. Reply to everything. Check Wednesday\'s post engagement one more time.'},
-    {time:'8:20–9:20', name:'LinkedIn outreach — 3–5 DMs', tag:'high ROI', tagClass:'jr-tag-high', desc:'Keep the cadence even mid-week. Outreach sent Thursday gets responses Monday — keeps next week warm.'},
-    {time:'9:20–10:20', name:'Tailor resume to 1–2 roles + apply', tag:'high ROI', tagClass:'jr-tag-high', desc:'Lighter volume today — 2–3 quality applications. Pull remaining roles from this week\'s tracker. Tailor, apply, don\'t rush.'},
-    {time:'10:20–10:50', name:'Follow-up on week-old DMs', tag:'medium ROI', tagClass:'jr-tag-med', desc:'Review DMs sent last Thursday. One follow-up. Close out non-responders after that.'},
-    {time:'10:50–11:30', name:'Log activity + mid-week pulse check', tag:'', tagClass:'', desc:'Update tracker. Note week totals so far — apps sent, DMs sent, replies received. Are you on pace? Adjust Friday accordingly.'},
-    {time:'1:00–5:00', name:'Attend networking event', tag:'Thursday priority', tagClass:'jr-tag-unique', desc:'Most Bay Area sales events run Thursday evening — many start at 5–6pm. Use this afternoon to travel, prepare, and arrive early. If no event this week: use the block for informational calls with people who responded to your DMs, or to activate your Stanford AIMI connection.'}
+  { id:'thu', label:'Thursday', duration:'Daily tasks', badge:'Core day', badgeClass:'jr-badge-std', subtitle:'Daily execution', steps:[
+    {time:'Daily', name:'Apply to 10 targeted listings', tag:'high ROI', tagClass:'jr-tag-high', desc:'Apply to 10 well-fit roles (founding GTM / BizOps / Founders Associate at sub-50-person companies). Quality of targeting over raw count.'},
+    {time:'Daily', name:'Update networking conversations in APHRA', tag:'high ROI', tagClass:'jr-tag-high', desc:'Log latest touches and trigger timely follow-ups so warm threads don\'t go cold.'},
+    {time:'Daily', name:'Update rejections and interview progress in APHRA', tag:'', tagClass:'', desc:'Keep the tracker current. Logged interviews surface what needs prep.'}
   ]},
-  { id:'fri', label:'Friday', duration:'8:00–5:00', badge:'Review + close day', badgeClass:'jr-badge-light', subtitle:'AM — follow-ups & weekly review | PM — source next week + LinkedIn draft', steps:[
-    {time:'8:00–8:30', name:'Respond to replies + event follow-ups', tag:'high ROI', tagClass:'jr-tag-high', desc:'Clear inbox. If you attended a Thursday event, send follow-up messages to new contacts now — within 24 hours is ideal. Reference something specific from the conversation.'},
-    {time:'8:30–9:00', name:'Last follow-up batch of the week', tag:'medium ROI', tagClass:'jr-tag-med', desc:'Review DMs sent last Friday. One message to non-responders. After this they\'re closed.'},
-    {time:'9:00–9:45', name:'Weekly review', tag:'Friday only', tagClass:'jr-tag-unique', desc:'Count totals: applications, DMs, replies, conversations active, events attended. What got traction this week? What got none? Pick one thing to adjust next week — not everything.'},
-    {time:'9:45–10:30', name:'Draft next week\'s LinkedIn post', tag:'Friday only', tagClass:'jr-tag-unique', desc:'Write a rough draft while the week is fresh. What happened this week worth sharing? A conversation, something you learned, a mindset shift. Rough is fine — you\'ll refine it Monday and publish Tuesday.'},
-    {time:'10:30–11:30', name:'LinkedIn engagement block', tag:'', tagClass:'', desc:'30 min commenting on posts in your feed from sales professionals and hiring managers. 30 min engaging with comments on Tuesday\'s post before the week closes.'},
-    {time:'1:00–2:30', name:'Source next week\'s pipeline', tag:'Friday only', tagClass:'jr-tag-unique', desc:'Check Ashby, LinkedIn saved searches, and your 7 target company career pages. Save 10–15 roles to tracker. Do not apply today — this is Monday\'s pipeline.'},
-    {time:'2:30–3:30', name:'Research next week\'s networking events', tag:'', tagClass:'', desc:'Search Eventbrite, Luma, SDR Nation, Bravado for events next week. Identify 1 to target. RSVP now if popular. Note speakers or sponsors worth reaching out to beforehand.'},
-    {time:'3:30–5:00', name:'Wind down — protect the weekend', tag:'boundary', tagClass:'jr-tag-rule', desc:'No new applications, no DMs. Tie up loose ends, organize files, or rest. The weekend is fully off.'}
+  { id:'fri', label:'Friday', duration:'Daily tasks + Fri extras', badge:'Core day', badgeClass:'jr-badge-std', subtitle:'Daily execution + outreach', steps:[
+    {time:'Daily', name:'Apply to 10 targeted listings', tag:'high ROI', tagClass:'jr-tag-high', desc:'Apply to 10 well-fit roles (founding GTM / BizOps / Founders Associate at sub-50-person companies). Quality of targeting over raw count.'},
+    {time:'Daily', name:'Update networking conversations in APHRA', tag:'high ROI', tagClass:'jr-tag-high', desc:'Log latest touches and trigger timely follow-ups so warm threads don\'t go cold.'},
+    {time:'Daily', name:'Update rejections and interview progress in APHRA', tag:'', tagClass:'', desc:'Keep the tracker current. Logged interviews surface what needs prep.'},
+    {time:'Mon/Wed/Fri', name:'Send 2 cold DMs', tag:'high ROI', tagClass:'jr-tag-high', desc:'Highest-leverage activity: builds warm intros and practices the exact GTM/BizOps skill being hired for.'},
+    {time:'Mon/Wed/Fri', name:'Update Joseph on progress', tag:'', tagClass:'', desc:'Accountability check-in. Keeps the search consistent across cycles.'}
   ]},
   { id:'wknd', label:'Sat – Sun', duration:'0 hrs', badge:'Full off', badgeClass:'jr-badge-off', subtitle:'', steps:[
-    {time:'All day', name:'Rest completely', tag:'', tagClass:'', desc:'No applications, no DMs, no sourcing. Companies don\'t review apps on weekends. Recruiters aren\'t active. Your ability to show up sharp Monday — your most important day — depends on how well you rest. The job searches that fail are the ones that burn hot and collapse.'}
+    {time:'All day', name:'Rest completely', tag:'boundary', tagClass:'jr-tag-rule', desc:'The weekend is fully off. Recharge so you show up sharp on Monday.'}
   ]}
 ];
 
